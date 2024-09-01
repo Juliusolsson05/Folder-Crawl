@@ -1,0 +1,15 @@
+Metadata-Version: 2.1
+Name: folder_crawl
+Version: 0.1.0
+Summary: A CLI tool to print directory structure and display contents of text files.
+Home-page: https://github.com/juliusolsson/folder_crawl
+Author: Julius Olsson
+Author-email: julius.olsson05@gmail.com
+Classifier: Programming Language :: Python :: 3
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Operating System :: OS Independent
+Requires-Python: >=3.6
+Description-Content-Type: text/markdown
+License-File: LICENSE
+
+Got tired of copying with LLMs so decided to write a quick tool for it.

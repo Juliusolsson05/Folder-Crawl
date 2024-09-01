@@ -1,0 +1,11 @@
+LICENSE
+README.md
+pyproject.toml
+setup.py
+folder_crawl/__init__.py
+folder_crawl/cli.py
+folder_crawl.egg-info/PKG-INFO
+folder_crawl.egg-info/SOURCES.txt
+folder_crawl.egg-info/dependency_links.txt
+folder_crawl.egg-info/entry_points.txt
+folder_crawl.egg-info/top_level.txt

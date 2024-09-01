@@ -1,0 +1,2 @@
+[console_scripts]
+folder-crawl = folder_crawl.cli:main
