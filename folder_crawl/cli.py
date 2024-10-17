@@ -2,6 +2,30 @@ import os
 import argparse
 import mimetypes
 
+# List of common file extensions in development environments
+COMMON_DEV_EXTENSIONS = {
+    # Web development
+    '.html', '.htm', '.css', '.js', '.jsx', '.ts', '.tsx', '.vue', '.svelte',
+    # Server-side languages
+    '.py', '.rb', '.php', '.java', '.go', '.rs', '.cs', '.cpp', '.c', '.h',
+    # Data and config files
+    '.json', '.yaml', '.yml', '.xml', '.toml', '.ini', '.env',
+    # Markup and documentation
+    '.md', '.rst', '.tex', '.txt',
+    # Shell and scripts
+    '.sh', '.bash', '.zsh', '.ps1', '.bat', '.cmd',
+    # Database
+    '.sql', '.sqlite',
+    # DevOps and configuration management
+    '.tf', '.hcl', '.dockerignore', '.gitignore', 'Dockerfile', 'docker-compose.yml',
+    # Build and package management
+    'Makefile', '.gradle', 'pom.xml', 'package.json', 'requirements.txt', 'Gemfile',
+    # iOS and Android development
+    '.swift', '.kt', '.gradle',
+    # Other common formats
+    '.csv', '.log', '.conf'
+}
+
 def get_full_tree(directory, prefix="", ignore_patterns=None):
     """Recursively build the full tree structure of a directory."""
     ignore_patterns = ignore_patterns or []
@@ -29,6 +53,17 @@ def get_full_tree(directory, prefix="", ignore_patterns=None):
     
     return tree_lines
 
+def is_readable_text_file(path):
+    """Check if the file is a readable text file, including common dev file types."""
+    mime_type, _ = mimetypes.guess_type(path)
+    file_extension = os.path.splitext(path)[1].lower()
+    file_name = os.path.basename(path)
+    
+    return (os.path.getsize(path) > 0 and 
+            (mime_type and mime_type.startswith('text') or 
+             file_extension in COMMON_DEV_EXTENSIONS or
+             file_name in COMMON_DEV_EXTENSIONS))
+
 def print_tree(directory, prefix="", ignore_patterns=None):
     """Recursively print the tree structure of a directory and file contents."""
     ignore_patterns = ignore_patterns or []
@@ -54,9 +89,8 @@ def print_tree(directory, prefix="", ignore_patterns=None):
             # Recursively call print_tree with updated prefix
             print_tree(path, prefix + "    ", ignore_patterns)
         else:
-            # Check if the file is not empty and is a readable text file
-            mime_type, _ = mimetypes.guess_type(path)
-            if os.path.getsize(path) > 0 and mime_type and mime_type.startswith('text'):
+            # Check if the file is a readable text file
+            if is_readable_text_file(path):
                 print(f"And this is what is inside {item}:\n")
                 print('"""')
                 try:
@@ -100,4 +134,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
