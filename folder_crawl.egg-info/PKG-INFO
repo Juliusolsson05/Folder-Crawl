@@ -1,15 +1,256 @@
-Metadata-Version: 2.1
-Name: folder_crawl
-Version: 0.1.0
-Summary: A CLI tool to print directory structure and display contents of text files.
-Home-page: https://github.com/juliusolsson/folder_crawl
+Metadata-Version: 2.4
+Name: folder-crawl
+Version: 0.2.0
+Summary: A CLI tool to display folder structure and contents with gitignore-style filtering
+Home-page: https://github.com/juliusolsson/folder-crawl
 Author: Julius Olsson
 Author-email: julius.olsson05@gmail.com
-Classifier: Programming Language :: Python :: 3
+License: MIT
+Project-URL: Homepage, https://github.com/juliusolson/folder-crawl
+Project-URL: Repository, https://github.com/juliusolson/folder-crawl.git
+Project-URL: Issues, https://github.com/juliusolson/folder-crawl/issues
+Keywords: cli,folder,tree,directory,structure,gitignore
+Classifier: Development Status :: 4 - Beta
+Classifier: Environment :: Console
+Classifier: Intended Audience :: Developers
 Classifier: License :: OSI Approved :: MIT License
 Classifier: Operating System :: OS Independent
-Requires-Python: >=3.6
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3.7
+Classifier: Programming Language :: Python :: 3.8
+Classifier: Programming Language :: Python :: 3.9
+Classifier: Programming Language :: Python :: 3.10
+Classifier: Programming Language :: Python :: 3.11
+Classifier: Programming Language :: Python :: 3.12
+Classifier: Topic :: Software Development :: Libraries :: Python Modules
+Classifier: Topic :: Utilities
+Requires-Python: >=3.7
 Description-Content-Type: text/markdown
 License-File: LICENSE
+Requires-Dist: pathspec>=0.11.0
+Dynamic: author-email
+Dynamic: home-page
+Dynamic: license-file
+Dynamic: requires-python
 
-Got tired of copying with LLMs so decided to write a quick tool for it.
+# folder-crawl
+
+**folder-crawl** is a powerful command-line tool that displays directory structure and file contents with gitignore-style pattern matching. Perfect for sharing codebases with LLMs, documentation, or quick project exploration.
+
+## Features
+
+- 📁 Display directory tree structure with file sizes
+- 📝 Show contents of text files inline
+- 🎯 Gitignore-style pattern matching via `pathspec`
+- 🔍 Automatic `.foldercrawlignore` support, opt-in `.gitignore`
+- 🚫 Smart default ignores (node_modules, __pycache__, etc.)
+- 👁️ Optional hidden file inclusion
+- ⚡ Configurable output limits and depth
+- 🎨 Clean, readable markdown-compatible output
+
+## Installation
+
+Install from source:
+
+```bash
+git clone https://github.com/juliusolsson/folder-crawl.git
+cd folder-crawl
+pip install .
+```
+
+Or install in development mode:
+
+```bash
+pip install -e .
+```
+
+## Quick Start
+
+```bash
+# Display current directory with default ignores
+folder-crawl
+
+# Display specific directory
+folder-crawl /path/to/project
+
+# Ignore additional patterns
+folder-crawl -I "*.log|*.tmp|cache/"
+
+# Show hidden files
+folder-crawl --hidden
+
+# Structure only (no file contents)
+folder-crawl --no-contents
+
+# Limit depth
+folder-crawl --max-depth 2
+```
+
+## Usage
+
+```bash
+folder-crawl [OPTIONS] [PATH]
+```
+
+### Arguments
+
+- **PATH**: Directory to crawl (default: current directory)
+
+### Options
+
+| Option | Description |
+|--------|-------------|
+| `-I, --ignore PATTERN` | Gitignore-style patterns (pipe-separated or multiple flags) |
+| `--ignore-file PATH` | Path to ignore file (can be repeated) |
+| `--gitignore` | Also read .gitignore patterns (opt-in) |
+| `--no-default-ignore` | Don't use default patterns and .foldercrawlignore |
+| `--hidden` | Include hidden files and directories |
+| `--no-contents` | Show structure only, no file contents |
+| `--max-bytes N` | Max bytes to display per file (default: 50000) |
+| `--max-file-size N` | Max file size to process (default: 1000000) |
+| `--max-depth N` | Maximum directory depth to traverse |
+| `-v, --version` | Show version |
+
+## Examples
+
+### Basic Usage
+
+```bash
+# Current directory with smart defaults
+folder-crawl
+```
+
+### Custom Ignore Patterns
+
+```bash
+# Multiple patterns with pipe separator
+folder-crawl -I "*.log|*.tmp|cache/"
+
+# Multiple -I flags
+folder-crawl -I "*.log" -I "*.tmp" -I "cache/"
+
+# Use custom ignore file
+folder-crawl --ignore-file .myignore
+```
+
+### Control What's Displayed
+
+```bash
+# Include hidden files (.env, .git, etc.)
+folder-crawl --hidden
+
+# Structure only, no file contents
+folder-crawl --no-contents
+
+# Limit content output per file
+folder-crawl --max-bytes 10000
+
+# Limit directory traversal depth
+folder-crawl --max-depth 2
+```
+
+### Working with Git Projects
+
+```bash
+# Default: uses .foldercrawlignore but NOT .gitignore
+folder-crawl
+
+# Opt-in to also use .gitignore
+folder-crawl --gitignore
+
+# Skip all default ignores (including .foldercrawlignore)
+folder-crawl --no-default-ignore
+```
+
+## Ignore Patterns
+
+folder-crawl uses gitignore-style patterns powered by `pathspec`:
+
+- `*.log` - Match all .log files
+- `cache/` - Match directories named cache
+- `**/test_*.py` - Match test files in any directory
+- `!important.log` - Negate pattern (include important.log)
+
+### Pattern Priority
+
+1. Command-line patterns (`-I` flags)
+2. Custom ignore files (`--ignore-file`)
+3. `.gitignore` (only when `--gitignore` is specified)
+4. `.foldercrawlignore` (unless `--no-default-ignore`)
+5. Default patterns (unless `--no-default-ignore`)
+
+### Default Ignore Patterns
+
+By default, folder-crawl ignores:
+- Version control: `.git/`, `.svn/`, `.hg/`
+- Dependencies: `node_modules/`, `venv/`, `*.egg-info/`
+- Build artifacts: `dist/`, `build/`, `__pycache__/`
+- IDE files: `.idea/`, `.vscode/`, `*.swp`
+- OS files: `.DS_Store`, `Thumbs.db`
+- Compiled: `*.pyc`, `*.pyo`, `*.so`, `*.dll`
+
+## .foldercrawlignore
+
+Create a `.foldercrawlignore` file in your project root for project-specific ignores:
+
+```gitignore
+# Custom project ignores
+data/
+*.secret
+config/local.yml
+temp/
+```
+
+## Output Format
+
+folder-crawl produces clean, markdown-compatible output:
+
+```
+📁 /path/to/project
+============================================================
+
+## Structure:
+
+project/
+├── src/
+│   ├── main.py (2.5KB)
+│   └── utils.py (1.2KB)
+├── tests/
+│   └── test_main.py (3.1KB)
+└── README.md (4.2KB)
+
+## File Contents:
+
+### src/main.py
+```python
+def main():
+    print("Hello, World!")
+```
+
+### src/utils.py
+```python
+def helper():
+    return 42
+```
+```
+
+## Use Cases
+
+- 📤 **Share code with LLMs**: Perfect format for ChatGPT, Claude, etc.
+- 📚 **Documentation**: Generate project structure docs
+- 🔍 **Code review**: Quick project overview
+- 🚀 **Onboarding**: Help new team members understand project layout
+- 🐛 **Debugging**: Share relevant code context in issues
+
+## License
+
+MIT License. See [LICENSE](LICENSE) file for details.
+
+## Author
+
+**Julius Olsson**
+Email: [julius.olsson05@gmail.com](mailto:julius.olsson05@gmail.com)
+
+---
+
+*Built for developers who need to share code context efficiently.*

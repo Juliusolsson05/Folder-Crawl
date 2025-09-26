@@ -1,80 +1,221 @@
-```markdown
-# Folder Crawl
+# folder-crawl
 
-**Folder Crawl** is a command-line tool designed to print the structure of a directory and display the contents of text files. Tired of manually navigating and copying with Large Language Models (LLMs)? This tool simplifies the process by giving you a quick overview of your file system with the ability to ignore specific files or folders.
+**folder-crawl** is a powerful command-line tool that displays directory structure and file contents with gitignore-style pattern matching. Perfect for sharing codebases with LLMs, documentation, or quick project exploration.
 
 ## Features
 
-- Recursively prints the directory structure, similar to the `tree` command.
-- Displays the contents of non-empty text files, encapsulated within triple quotes.
-- Allows ignoring specific files or folders using patterns.
+- 📁 Display directory tree structure with file sizes
+- 📝 Show contents of text files inline
+- 🎯 Gitignore-style pattern matching via `pathspec`
+- 🔍 Automatic `.foldercrawlignore` support, opt-in `.gitignore`
+- 🚫 Smart default ignores (node_modules, __pycache__, etc.)
+- 👁️ Optional hidden file inclusion
+- ⚡ Configurable output limits and depth
+- 🎨 Clean, readable markdown-compatible output
 
 ## Installation
 
-You can install Folder Crawl using `pip`. First, clone the repository and navigate to the project directory:
+Install from source:
 
 ```bash
-git clone https://github.com/juliusolsson/folder_crawl.git
-cd folder_crawl
-```
-
-Then install the package locally:
-
-```bash
+git clone https://github.com/juliusolsson/folder-crawl.git
+cd folder-crawl
 pip install .
 ```
 
-This will make the `folder-crawl` command available globally on your system.
+Or install in development mode:
+
+```bash
+pip install -e .
+```
+
+## Quick Start
+
+```bash
+# Display current directory with default ignores
+folder-crawl
+
+# Display specific directory
+folder-crawl /path/to/project
+
+# Ignore additional patterns
+folder-crawl -I "*.log|*.tmp|cache/"
+
+# Show hidden files
+folder-crawl --hidden
+
+# Structure only (no file contents)
+folder-crawl --no-contents
+
+# Limit depth
+folder-crawl --max-depth 2
+```
 
 ## Usage
 
-The basic usage of Folder Crawl is simple. Run the following command:
-
 ```bash
-folder-crawl [OPTIONS] [DIRECTORY]
+folder-crawl [OPTIONS] [PATH]
 ```
 
 ### Arguments
 
-- **DIRECTORY**: The directory to print the tree structure for. Defaults to the current directory if not specified.
+- **PATH**: Directory to crawl (default: current directory)
 
 ### Options
 
-- `-I`, `--ignore`: Specify patterns to ignore files or directories. For example: `__pycache__|*.pyc`.
+| Option | Description |
+|--------|-------------|
+| `-I, --ignore PATTERN` | Gitignore-style patterns (pipe-separated or multiple flags) |
+| `--ignore-file PATH` | Path to ignore file (can be repeated) |
+| `--gitignore` | Also read .gitignore patterns (opt-in) |
+| `--no-default-ignore` | Don't use default patterns and .foldercrawlignore |
+| `--hidden` | Include hidden files and directories |
+| `--no-contents` | Show structure only, no file contents |
+| `--max-bytes N` | Max bytes to display per file (default: 50000) |
+| `--max-file-size N` | Max file size to process (default: 1000000) |
+| `--max-depth N` | Maximum directory depth to traverse |
+| `-v, --version` | Show version |
 
-### Examples
+## Examples
 
-1. **Print the tree structure of the current directory:**
+### Basic Usage
 
-   ```bash
-   folder-crawl
-   ```
+```bash
+# Current directory with smart defaults
+folder-crawl
+```
 
-2. **Print the tree structure of a specific directory:**
+### Custom Ignore Patterns
 
-   ```bash
-   folder-crawl /path/to/directory
-   ```
+```bash
+# Multiple patterns with pipe separator
+folder-crawl -I "*.log|*.tmp|cache/"
 
-3. **Ignore specific files or folders:**
+# Multiple -I flags
+folder-crawl -I "*.log" -I "*.tmp" -I "cache/"
 
-   ```bash
-   folder-crawl -I "__pycache__|*.pyc" /path/to/directory
-   ```
+# Use custom ignore file
+folder-crawl --ignore-file .myignore
+```
 
-   This command will ignore files and folders matching the specified patterns.
+### Control What's Displayed
 
-## Why Folder Crawl?
+```bash
+# Include hidden files (.env, .git, etc.)
+folder-crawl --hidden
 
-While working with Large Language Models and development projects, constantly navigating directories and copying file contents can be cumbersome. Folder Crawl offers a quick and efficient way to explore directories and view file contents without leaving your terminal.
+# Structure only, no file contents
+folder-crawl --no-contents
+
+# Limit content output per file
+folder-crawl --max-bytes 10000
+
+# Limit directory traversal depth
+folder-crawl --max-depth 2
+```
+
+### Working with Git Projects
+
+```bash
+# Default: uses .foldercrawlignore but NOT .gitignore
+folder-crawl
+
+# Opt-in to also use .gitignore
+folder-crawl --gitignore
+
+# Skip all default ignores (including .foldercrawlignore)
+folder-crawl --no-default-ignore
+```
+
+## Ignore Patterns
+
+folder-crawl uses gitignore-style patterns powered by `pathspec`:
+
+- `*.log` - Match all .log files
+- `cache/` - Match directories named cache
+- `**/test_*.py` - Match test files in any directory
+- `!important.log` - Negate pattern (include important.log)
+
+### Pattern Priority
+
+1. Command-line patterns (`-I` flags)
+2. Custom ignore files (`--ignore-file`)
+3. `.gitignore` (only when `--gitignore` is specified)
+4. `.foldercrawlignore` (unless `--no-default-ignore`)
+5. Default patterns (unless `--no-default-ignore`)
+
+### Default Ignore Patterns
+
+By default, folder-crawl ignores:
+- Version control: `.git/`, `.svn/`, `.hg/`
+- Dependencies: `node_modules/`, `venv/`, `*.egg-info/`
+- Build artifacts: `dist/`, `build/`, `__pycache__/`
+- IDE files: `.idea/`, `.vscode/`, `*.swp`
+- OS files: `.DS_Store`, `Thumbs.db`
+- Compiled: `*.pyc`, `*.pyo`, `*.so`, `*.dll`
+
+## .foldercrawlignore
+
+Create a `.foldercrawlignore` file in your project root for project-specific ignores:
+
+```gitignore
+# Custom project ignores
+data/
+*.secret
+config/local.yml
+temp/
+```
+
+## Output Format
+
+folder-crawl produces clean, markdown-compatible output:
+
+```
+📁 /path/to/project
+============================================================
+
+## Structure:
+
+project/
+├── src/
+│   ├── main.py (2.5KB)
+│   └── utils.py (1.2KB)
+├── tests/
+│   └── test_main.py (3.1KB)
+└── README.md (4.2KB)
+
+## File Contents:
+
+### src/main.py
+```python
+def main():
+    print("Hello, World!")
+```
+
+### src/utils.py
+```python
+def helper():
+    return 42
+```
+```
+
+## Use Cases
+
+- 📤 **Share code with LLMs**: Perfect format for ChatGPT, Claude, etc.
+- 📚 **Documentation**: Generate project structure docs
+- 🔍 **Code review**: Quick project overview
+- 🚀 **Onboarding**: Help new team members understand project layout
+- 🐛 **Debugging**: Share relevant code context in issues
 
 ## License
 
-This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
+MIT License. See [LICENSE](LICENSE) file for details.
 
 ## Author
 
-**Julius Olsson**  
+**Julius Olsson**
 Email: [julius.olsson05@gmail.com](mailto:julius.olsson05@gmail.com)
 
-Got tired of copying with LLMs, so I decided to write a quick tool for it!
+---
+
+*Built for developers who need to share code context efficiently.*

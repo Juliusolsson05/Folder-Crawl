@@ -1,0 +1,17 @@
+# folder-crawl ignore file
+# Uses gitignore syntax: https://git-scm.com/docs/gitignore
+
+# Project-specific ignores
+# Add patterns here for files/folders you want to exclude
+# when running folder-crawl on this project
+
+# Example patterns:
+# data/               # Ignore data directory
+# *.secret           # Ignore all .secret files
+# config/local.yml   # Ignore specific config file
+# temp/              # Ignore temp directory
+# **/cache/          # Ignore cache dirs anywhere
+# !important.log     # Don't ignore important.log
+
+# Common development artifacts already in defaults:
+# __pycache__/, *.pyc, node_modules/, .git/, etc.
