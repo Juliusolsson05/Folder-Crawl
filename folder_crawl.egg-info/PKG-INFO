@@ -101,6 +101,7 @@ folder-crawl [OPTIONS] [PATH]
 | Option | Description |
 |--------|-------------|
 | `-I, --ignore PATTERN` | Gitignore-style patterns (pipe-separated or multiple flags) |
+| `--set-default` | Save the -I/--ignore patterns to .foldercrawlignore |
 | `--ignore-file PATH` | Path to ignore file (can be repeated) |
 | `--gitignore` | Also read .gitignore patterns (opt-in) |
 | `--no-default-ignore` | Don't use default patterns and .foldercrawlignore |
@@ -131,6 +132,12 @@ folder-crawl -I "*.log" -I "*.tmp" -I "cache/"
 
 # Use custom ignore file
 folder-crawl --ignore-file .myignore
+
+# Save patterns as default for this directory
+folder-crawl -I "__pycache__|*.pyc|build/|*.egg-info/" --set-default .
+
+# Future runs will use the saved patterns automatically
+folder-crawl .
 ```
 
 ### Control What's Displayed
