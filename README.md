@@ -18,7 +18,7 @@
 Install from source:
 
 ```bash
-git clone https://github.com/juliusolsson/folder-crawl.git
+git clone https://github.com/juliusolsson05/folder-crawl.git
 cd folder-crawl
 pip install .
 ```
