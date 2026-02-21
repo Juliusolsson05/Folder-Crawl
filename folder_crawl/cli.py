@@ -372,6 +372,46 @@ def process_contents(
                 pass
 
 
+def count_lines(
+    root: Path,
+    spec: pathspec.PathSpec,
+    include_hidden: bool,
+    max_file_size: int,
+    current_path: Optional[Path] = None
+) -> int:
+    """
+    Recursively count lines of code across all matched text files.
+    """
+    if current_path is None:
+        current_path = root
+
+    total = 0
+
+    try:
+        items = sorted(current_path.iterdir())
+    except PermissionError:
+        return 0
+
+    for item in items:
+        if should_ignore(item, root, spec, include_hidden):
+            continue
+
+        if item.is_dir():
+            total += count_lines(root, spec, include_hidden, max_file_size, item)
+        elif item.is_file():
+            try:
+                size = item.stat().st_size
+                if size > max_file_size:
+                    continue
+                if is_text_file(item):
+                    with open(item, 'r', encoding='utf-8', errors='replace') as f:
+                        total += sum(1 for _ in f)
+            except (OSError, UnicodeDecodeError):
+                pass
+
+    return total
+
+
 def main():
     parser = argparse.ArgumentParser(
         description='Display folder structure and contents with gitignore-style filtering',
@@ -473,9 +513,15 @@ Examples:
     )
 
     parser.add_argument(
+        '--lines',
+        action='store_true',
+        help='Only output the total number of lines of code across all matched text files'
+    )
+
+    parser.add_argument(
         '-v', '--version',
         action='version',
-        version='%(prog)s 0.2.0'
+        version='%(prog)s 0.3.0'
     )
 
     args = parser.parse_args()
@@ -514,6 +560,19 @@ Examples:
         args.use_default_ignore,
         root_path
     )
+
+    # Handle --lines mode
+    if args.lines:
+        try:
+            total = count_lines(root_path, spec, args.hidden, args.max_file_size)
+            print(total)
+        except KeyboardInterrupt:
+            print("\n\nInterrupted by user", file=sys.stderr)
+            sys.exit(1)
+        except Exception as e:
+            print(f"\nError: {e}", file=sys.stderr)
+            sys.exit(1)
+        return
 
     # Process the directory
     try:
